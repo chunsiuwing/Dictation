@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>English Dictation Revision App</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Header -->
+    <header class="app-header">
+      <h1>📝 English Dictation Revision</h1>
+      <p class="subtitle">英語默書練習</p>
+      <div class="header-buttons">
+        <button class="btn btn-setting" id="btn-teacher">📊 Teacher</button>
+        <button class="btn btn-setting" id="btn-settings">⚙️ Settings</button>
+      </div>
+    </header>
+
+    <!-- Screen 1: Upload PDF -->
+    <section id="screen-upload" class="screen active">
+      <div class="upload-area">
+        <div class="upload-icon">📄</div>
+        <h2>Upload Your Passage</h2>
+        <p>Upload a PDF passage to start practising</p>
+        <input type="file" id="pdf-file" accept=".pdf" hidden>
+        <button class="btn btn-primary btn-large" onclick="document.getElementById('pdf-file').click()">
+          Choose PDF File
+        </button>
+        <div class="divider">or</div>
+        <div class="difficulty-selector">
+          <p>Choose a difficulty level:</p>
+          <div class="difficulty-buttons">
+            <button class="btn btn-difficulty active" data-level="easy">Easy</button>
+            <button class="btn btn-difficulty" data-level="medium">Medium</button>
+            <button class="btn btn-difficulty" data-level="hard">Hard</button>
+          </div>
+        </div>
+        <button class="btn btn-secondary" id="btn-sample">Try Sample Passage</button>
+      </div>
+      <div class="features">
+        <div class="feature">🔊 Listen to words</div>
+        <div class="feature">📖 Chinese meanings</div>
+        <div class="feature">✏️ Spelling practice</div>
+        <div class="feature">📝 Passage revision</div>
+      </div>
+      <div class="sen-features">
+        <h3>SEN Support Features</h3>
+        <div class="sen-feature-grid">
+          <div class="sen-feature">🎯 Focus Mode - one word at a time</div>
+          <div class="sen-feature">⭐ Star rewards & encouragement</div>
+          <div class="sen-feature">🖼️ Picture & emoji support</div>
+          <div class="sen-feature">🔄 Repetition & overlearning</div>
+          <div class="sen-feature">🐢 Adjustable speech rate</div>
+          <div class="sen-feature">📊 Progress tracking</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Screen 2: Reading Passage -->
+    <section id="screen-reading" class="screen">
+      <div class="passage-header">
+        <button class="btn btn-back" id="btn-back-upload">← Back</button>
+        <h2 id="passage-title">Passage</h2>
+        <div class="header-buttons">
+          <button class="btn btn-setting" id="btn-settings-reading">⚙️</button>
+          <div class="progress-info">
+            <span id="words-learned">0</span> / <span id="words-total">0</span> words
+          </div>
+        </div>
+      </div>
+      <div class="passage-container">
+        <div id="passage-text" class="passage-text"></div>
+      </div>
+      <div class="passage-actions">
+        <button class="btn btn-primary" id="btn-spelling-mode">✏️ Spelling Practice</button>
+        <button class="btn btn-dictation" id="btn-dictation-mode">🎧 Dictation Quiz</button>
+        <button class="btn btn-secondary" id="btn-revision-mode">📝 Passage Revision</button>
+        <button class="btn btn-focus" id="btn-focus-mode">🎯 Focus Mode</button>
+        <button class="btn btn-wordbank" id="btn-word-bank">📚 Word Bank</button>
+      </div>
+    </section>
+
+    <!-- Screen 3: Word Detail Panel (Modal) -->
+    <div id="word-modal" class="modal">
+      <div class="modal-content">
+        <button class="modal-close" id="btn-close-modal">&times;</button>
+        <div class="word-detail">
+          <div class="word-header">
+            <div class="word-title">
+              <span id="modal-emoji" class="word-emoji"></span>
+              <h2 id="modal-word">Word</h2>
+            </div>
+            <button class="btn btn-audio" id="btn-speak-word">🔊 Listen</button>
+          </div>
+          <div class="word-info">
+            <div class="info-row">
+              <span class="info-label">Chinese:</span>
+              <span id="modal-chinese" class="info-value chinese"></span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Part of Speech:</span>
+              <span id="modal-pos" class="info-value"></span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Phonics:</span>
+              <span id="modal-phonics" class="info-value phonics"></span>
+            </div>
+          </div>
+          <div class="syllables-section">
+            <h3>Syllables:</h3>
+            <div id="syllables-display" class="syllables-display"></div>
+          </div>
+          <div class="phonics-blending">
+            <h3>Sound it out:</h3>
+            <div id="phonics-chunks" class="phonics-chunks"></div>
+            <button class="btn btn-primary" id="btn-blend">▶ Blend Together</button>
+          </div>
+          <div class="word-actions">
+            <button class="btn btn-secondary" id="btn-learn-spelling">✏️ Learn to Spell</button>
+            <button class="btn btn-primary" id="btn-test-spelling">📝 Test Me</button>
+            <button class="btn btn-wordbank" id="btn-add-wordbank">📚 Save to Word Bank</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 4: Focus Mode (SEN) -->
+    <section id="screen-focus" class="screen">
+      <div class="focus-header">
+        <button class="btn btn-back" id="btn-back-from-focus">← Back</button>
+        <h2>🎯 Focus Mode</h2>
+        <div class="focus-progress">
+          <span id="focus-current">1</span> / <span id="focus-total">10</span>
+        </div>
+      </div>
+      <div class="focus-container">
+        <div class="focus-word-card">
+          <div id="focus-emoji" class="focus-emoji"></div>
+          <h2 id="focus-word" class="focus-word">Word</h2>
+          <div id="focus-phonics" class="focus-phonics"></div>
+          <div id="focus-chinese" class="focus-chinese"></div>
+          <div id="focus-pos" class="focus-pos"></div>
+        </div>
+        <div class="focus-syllables" id="focus-syllables"></div>
+        <div class="focus-phonics-chunks" id="focus-phonics-chunks"></div>
+        <div class="focus-controls">
+          <button class="btn btn-audio btn-large" id="btn-focus-speak">🔊 Listen</button>
+          <button class="btn btn-primary" id="btn-focus-blend">▶ Blend</button>
+          <button class="btn btn-secondary" id="btn-focus-repeat">🔄 Repeat</button>
+        </div>
+        <div class="focus-navigation">
+          <button class="btn btn-back" id="btn-focus-prev">← Previous</button>
+          <button class="btn btn-primary" id="btn-focus-next">Next →</button>
+        </div>
+        <div class="focus-stars" id="focus-stars"></div>
+      </div>
+    </section>
+
+    <!-- Screen 5: Word Bank (SEN) -->
+    <section id="screen-wordbank" class="screen">
+      <div class="wordbank-header">
+        <button class="btn btn-back" id="btn-back-from-wordbank">← Back</button>
+        <h2>📚 Word Bank</h2>
+        <div class="wordbank-count"><span id="wordbank-count">0</span> words saved</div>
+      </div>
+      <div class="wordbank-container">
+        <p class="wordbank-instruction">These are your difficult words. Practice them regularly!</p>
+        <div id="wordbank-list" class="wordbank-list"></div>
+        <div class="wordbank-actions">
+          <button class="btn btn-primary" id="btn-practice-wordbank">✏️ Practice These Words</button>
+          <button class="btn btn-secondary" id="btn-clear-wordbank">🗑️ Clear All</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Screen 6: Spelling Tutorial (Video-like) -->
+    <section id="screen-spelling-tutorial" class="screen">
+      <div class="tutorial-header">
+        <button class="btn btn-back" id="btn-back-from-tutorial">← Back</button>
+        <h2>Learn to Spell</h2>
+      </div>
+      <div class="tutorial-container">
+        <div class="spelling-video" id="spelling-video">
+          <div class="video-screen">
+            <div id="spelling-display" class="spelling-display"></div>
+          </div>
+          <div class="video-controls">
+            <button class="btn btn-primary" id="btn-play-spelling">▶ Play</button>
+            <button class="btn btn-secondary" id="btn-replay-spelling">🔄 Replay</button>
+          </div>
+        </div>
+        <div class="spelling-info">
+          <p>Watch how to spell the word, then try it yourself!</p>
+          <div id="spelling-hint" class="spelling-hint"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Screen 7: Spelling Test / Dictation Quiz -->
+    <section id="screen-spelling-test" class="screen">
+      <div class="test-header">
+        <button class="btn btn-back" id="btn-back-from-test">← Back</button>
+        <h2 id="test-title">Spelling Test</h2>
+        <div class="test-score">Score: <span id="test-score">0</span> ⭐</div>
+      </div>
+      <div class="test-container">
+        <!-- Word Selection (for dictation mode) -->
+        <div id="dictation-setup" class="dictation-setup">
+          <h3>Choose words to practice:</h3>
+          <div class="dictation-options">
+            <button class="btn btn-dictation-option active" data-selection="all">All Words</button>
+            <button class="btn btn-dictation-option" data-selection="starred">Starred Only</button>
+            <button class="btn btn-dictation-option" data-selection="random">Random 10</button>
+          </div>
+          <div class="dictation-audio-ctrl">
+            <span>Audio Speed:</span>
+            <button class="btn btn-speed" data-speed="0.5">🐢 0.5x</button>
+            <button class="btn btn-speed active" data-speed="0.7">🚶 0.7x</button>
+            <button class="btn btn-speed" data-speed="1.0">🐇 1.0x</button>
+          </div>
+          <div class="dictation-context-ctrl">
+            <label>
+              <input type="checkbox" id="chk-sentence-context" checked>
+              Read sentence context
+            </label>
+          </div>
+          <button class="btn btn-primary btn-large" id="btn-start-dictation">🎧 Start Dictation</button>
+        </div>
+
+        <!-- Active Test Area -->
+        <div id="test-area" class="test-area" style="display:none;">
+          <div class="test-question">
+            <p>Listen to the word and type the correct spelling:</p>
+            <button class="btn btn-audio btn-large" id="btn-hear-test-word">🔊 Hear Word</button>
+            <div id="sentence-context" class="sentence-context"></div>
+            <p class="or">or</p>
+            <p>Look at the Chinese meaning:</p>
+            <div id="test-chinese-hint" class="chinese-hint"></div>
+            <div id="test-emoji-hint" class="test-emoji-hint"></div>
+          </div>
+
+          <!-- Hint System -->
+          <div class="hint-area">
+            <button class="btn btn-hint" id="btn-hint-chinese">💡 Chinese Hint</button>
+            <button class="btn btn-hint" id="btn-hint-first">🔤 First Letter</button>
+            <button class="btn btn-hint" id="btn-hint-length">📏 Word Length</button>
+            <button class="btn btn-hint" id="btn-hint-syllable">🔊 Syllable Count</button>
+          </div>
+          <div id="hint-display" class="hint-display"></div>
+
+          <div class="test-input-area">
+            <input type="text" id="test-answer" class="test-input" placeholder="Type the word here..." autocomplete="off">
+            <button class="btn btn-primary" id="btn-check-answer">Check</button>
+          </div>
+          <div id="test-feedback" class="test-feedback"></div>
+          <div class="test-stars" id="test-stars"></div>
+          <div class="test-actions">
+            <button class="btn btn-secondary" id="btn-next-word">Next Word →</button>
+            <button class="btn btn-primary" id="btn-finish-test">Finish</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Screen 8: Passage Revision -->
+    <section id="screen-revision" class="screen">
+      <div class="revision-header">
+        <button class="btn btn-back" id="btn-back-from-revision">← Back</button>
+        <h2>Passage Revision</h2>
+        <div class="revision-score">Score: <span id="revision-score">0</span></div>
+      </div>
+      <div class="revision-container">
+        <p class="revision-instruction">Fill in the missing words to complete the passage:</p>
+        <div id="revision-passage" class="revision-passage"></div>
+        <div class="revision-actions">
+          <button class="btn btn-primary" id="btn-check-revision">Check Answers</button>
+          <button class="btn btn-secondary" id="btn-show-answers">Show Answers</button>
+        </div>
+        <div id="revision-feedback" class="revision-feedback"></div>
+      </div>
+    </section>
+
+    <!-- Screen 9: Results -->
+    <section id="screen-results" class="screen">
+      <div class="results-container">
+        <h2>🎉 Great Job!</h2>
+        <div class="results-stars" id="results-stars"></div>
+        <div class="results-summary">
+          <div class="result-item">
+            <span class="result-label">Words Learned:</span>
+            <span id="result-words" class="result-value">0</span>
+          </div>
+          <div class="result-item">
+            <span class="result-label">Spelling Score:</span>
+            <span id="result-spelling" class="result-value">0/0</span>
+          </div>
+          <div class="result-item">
+            <span class="result-label">Revision Score:</span>
+            <span id="result-revision" class="result-value">0/0</span>
+          </div>
+          <div class="result-item">
+            <span class="result-label">Stars Earned:</span>
+            <span id="result-stars" class="result-value">0 ⭐</span>
+          </div>
+        </div>
+        <div class="results-actions">
+          <button class="btn btn-primary" id="btn-practice-again">Practice Again</button>
+          <button class="btn btn-secondary" id="btn-new-passage">New Passage</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Screen 11: Teacher Dashboard -->
+    <section id="screen-teacher" class="screen">
+      <div class="teacher-header">
+        <button class="btn btn-back" id="btn-back-from-teacher">← Back</button>
+        <h2>📊 Teacher Dashboard</h2>
+        <button class="btn btn-secondary" id="btn-export-data">Export Data</button>
+      </div>
+      <div class="teacher-container">
+        <div class="teacher-stats">
+          <div class="stat-card">
+            <div class="stat-value" id="stat-total-words">0</div>
+            <div class="stat-label">Total Words Learned</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-avg-score">0%</div>
+            <div class="stat-label">Average Score</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-sessions">0</div>
+            <div class="stat-label">Sessions Completed</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-stars">0</div>
+            <div class="stat-label">Stars Earned</div>
+          </div>
+        </div>
+        <div class="teacher-section">
+          <h3>Words Needing Practice</h3>
+          <div id="teacher-difficult-words" class="teacher-words-list"></div>
+        </div>
+        <div class="teacher-section">
+          <h3>Recent Activity</h3>
+          <div id="teacher-recent-activity" class="teacher-activity-list"></div>
+        </div>
+        <div class="teacher-section">
+          <h3>Progress Over Time</h3>
+          <div id="teacher-progress-chart" class="teacher-chart"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Screen 10: Settings (SEN) -->
+    <section id="screen-settings" class="screen">
+      <div class="settings-header">
+        <button class="btn btn-back" id="btn-back-from-settings">← Back</button>
+        <h2>⚙️ Settings</h2>
+      </div>
+      <div class="settings-container">
+        <div class="setting-group">
+          <h3>Speech Rate</h3>
+          <div class="setting-options">
+            <button class="btn btn-setting" data-rate="0.5">🐢 Slow</button>
+            <button class="btn btn-setting active" data-rate="0.7">🚶 Normal</button>
+            <button class="btn btn-setting" data-rate="1.0">🐇 Fast</button>
+          </div>
+        </div>
+        <div class="setting-group">
+          <h3>Text Size</h3>
+          <div class="setting-options">
+            <button class="btn btn-setting" data-size="small">A Small</button>
+            <button class="btn btn-setting active" data-size="medium">A Medium</button>
+            <button class="btn btn-setting" data-size="large">A Large</button>
+          </div>
+        </div>
+        <div class="setting-group">
+          <h3>Repetition Mode</h3>
+          <div class="setting-options">
+            <button class="btn btn-setting" data-repeat="1">1x</button>
+            <button class="btn btn-setting active" data-repeat="2">2x</button>
+            <button class="btn btn-setting" data-repeat="3">3x</button>
+          </div>
+        </div>
+        <div class="setting-group">
+          <h3>High Contrast Mode</h3>
+          <div class="setting-options">
+            <button class="btn btn-setting" id="btn-contrast">🔲 Toggle Contrast</button>
+          </div>
+        </div>
+        <div class="setting-group">
+          <h3>Focus Mode (SEN)</h3>
+          <div class="setting-options">
+            <button class="btn btn-setting" id="btn-focus-setting">🎯 Enable Focus Mode</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- pdf.js from CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="js/dictionary.js"></script>
+  <script src="js/phonics.js"></script>
+  <script src="js/emoji-map.js"></script>
+  <script src="js/sample-passages.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
